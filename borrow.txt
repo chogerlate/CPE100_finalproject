@@ -1,0 +1,15 @@
+0
+Borrow: David
+Return: David
+
+1
+Borrow: John
+
+0
+
+0
+Borrow: Joe
+Return: Joe
+
+1
+Borrow: Cheve
