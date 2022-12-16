@@ -237,58 +237,72 @@ void saveBookList(LIST_T *list, char *filepath) {
 }
 
 void bookEdit(LIST_T *list) {
-  int selectedIndex;
-  int stoploop = 0;
-  // วน Loop เพื่อเช็คหาชื่อหนังสือที่ต้องการแก้ไข
-  while (stoploop != 1) {
-    char selectedTitle[60] = "";
+  int selectedIndex; // ตัวแปรสำหรับเก็บค่า index ที่ต้องการจะแก้ไข
+  int stoploop = 0; // ตัวแปรสำหรับเงื่อนไข loop
+  // Loop-1(While) รับค่าอินพุต (หากค้นหาชื่อหนังสือไม่เจอ จะวนลูปเพื่อรับค่าใหม่เรื่อยๆ)
+  // Loop-2(for) ค้นหาหนังสือตามที่ชื่อที่ต้องการ และเพื่อระบุ index ที่ต้องการแก้ไข
+  while (stoploop != 1) { 
+    char selectedTitle[60] = ""; // ตัวแปรสำหรับเก็บชื่อหนังสือที่ผู้ใช้อินพุต
     printf("Enter title to edit: ");
     fgets(selectedTitle, MAX_CHAR_LENGTH, stdin);
     fflush(stdin);
-    selectedTitle[strcspn(selectedTitle, "\n")] = 0;
-    char book_title[60] = "";
-    int cmp;
+    selectedTitle[strcspn(selectedTitle, "\n")] = 0; // ตัด "\n" เพื่อเอาค่ามาเช็ค
     for (int index = 0; index < list->currentSize; index++) {
-      strcpy(book_title, getBookByIndex(list, index)->title);
-      cmp = strcmp(selectedTitle, book_title);
-      if (cmp == 0) {
-        selectedIndex = index;
-        stoploop = 1; // ออกจากลูปใน
+      // กรณี 1: เจอชื่อหนังสือที่ต้องการแก้ไข
+      if (strcmp(selectedTitle, getBookByIndex(list, index)->title) == 0) {
+        selectedIndex = index; // ระบุ index ที่ต้องการแก้ไข
+        stoploop = 1; 
         break;
-      } else if (index == list->currentSize - 1) {
+      } 
+      // กรณี 2: วนลูปจนถึงรอบสุดท้ายแล้วยังไม่เจอหนังสือที่ต้องการแก้ไข
+      else if (index == list->currentSize - 1) {
         printf("Title not found\n");
       }
     }
   }
-  // edit detail of the book
-  BOOK *editedBook = (BOOK *)calloc(1, sizeof(BOOK));
+  
+  BOOK *editedBook = (BOOK *)calloc(1, sizeof(BOOK)); // สำหรับเก็บข้อมูลหลังแก้ไข
+  // Loop-1(While) แก้ไข title
+  // Loop-2(While) แก้ไข author name
+  // Loop-3(While) แก้ไข year name
   while (1) { // title
     char temp_title[60] = "";
     printf("New title (leave blank to retain old value): ");
     fgets(temp_title, sizeof(temp_title), stdin);
-    temp_title[strlen(temp_title) - 1] = 0; // remove /0 in first index
+    temp_title[strlen(temp_title) - 1] = 0; // ตัด "\n" เพื่อเอาค่ามาเช็ค
+    // กรณี 1 : เว้นว่าง (ไม่แก้ไขใดๆ คงค่าเดิมเอาไว้)
     if (strlen(temp_title) == 0) {
       strcpy(editedBook->title, getBookByIndex(list, selectedIndex)->title);
       break;
-    } else if (strlen(temp_title) > 60) {
+    } 
+    // กรณี 2 : อินพุตเกินจำนวนที่กำหนด (วนลูปเพื่อรับค่าใหม่อีกครั้ง)
+    else if (strlen(temp_title) > 60) {
       printf("Invalid title\n");
       continue;
-    } else if (strlen(temp_title) > 0 && strlen(temp_title) < 60) {
+    } 
+    // กรณี 3 : อินพุตตามปกติ (แก้ไขค่าตามอินพุต)
+    else if (strlen(temp_title) > 0 && strlen(temp_title) < 60) {
       strcpy(editedBook->title, temp_title);
       break;
     }
   }
-
   while (1) { // author name
     char temp_author[60] = "";
     printf("New author name (leave blank to retain old value): ");
-    scanf("%s", temp_author);
-    if (temp_author[0] == '\n') {
+    fgets(temp_author, sizeof(temp_author), stdin);
+    temp_author[strlen(temp_author) - 1] = 0; // ตัด "\n" เพื่อเอาค่ามาเช็ค
+    // กรณี 1 : เว้นว่าง (ไม่แก้ไขใดๆ คงค่าเดิมเอาไว้)
+    if (strlen(temp_author) == 0) {
+      strcpy(editedBook->author, getBookByIndex(list, selectedIndex)->author);
       break;
-    } else if (strlen(temp_author) > 60) {
+    } 
+    // กรณี 2 : อินพุตเกินจำนวนที่กำหนด (วนลูปเพื่อรับค่าใหม่อีกครั้ง)
+    else if (strlen(temp_author) > 60) {
       printf("Invalid author name\n");
       continue;
-    } else if (strlen(temp_author) > 0 && strlen(temp_author) < 60) {
+    }
+    // กรณี 3 : อินพุตตามปกติ (แก้ไขค่าตามอินพุต)
+    else if (strlen(temp_author) > 0 && strlen(temp_author) < 60) {
       strcpy(editedBook->author, temp_author);
       break;
     }
@@ -296,78 +310,105 @@ void bookEdit(LIST_T *list) {
   while (1) { // year name
     char temp_year[60] = "";
     printf("Enter publish year: ");
-    scanf("%s", temp_year);
-    if (strlen(temp_year) < 1) {
+    fgets(temp_year, sizeof(temp_year), stdin);
+    temp_year[strlen(temp_year) - 1] = 0; // ตัด "\n" เพื่อเอาค่ามาเช็ค
+    // กรณี 1 : เว้นว่าง (ไม่แก้ไขใดๆ คงค่าเดิมเอาไว้)
+    if (strlen(temp_year) == 0) {
+      editedBook->year = getBookByIndex(list, selectedIndex)->year;
       break;
-    } else if (strlen(temp_year) > 4) {
+    } 
+    // กรณี 2 : อินพุตผิดปกติ (วนลูปเพื่อรับค่าใหม่อีกครั้ง)
+    else if (strlen(temp_year) > 4) {
       printf("Invalid publish year\n");
       continue;
     }
-    int check = 0;
+    int check = 0; 
+    // ตรวจสอบว่าค่าที่อินพุตเป็นตัวเลขทั้งหมดหรือไม่
     for (int i = 0; i < strlen(temp_year); i++) {
       if (!isdigit(temp_year[i])) {
         check = 1;
         continue;
       }
     }
+    // กรณี 3 : อินพุตผิดปกติ (วนลูปเพื่อรับค่าใหม่อีกครั้ง)
     if (check == 1) {
       printf("Invalid publish year\n");
       continue;
     }
-    editedBook->year = atoi(temp_year);
+    editedBook->year = atoi(temp_year); // แก้ไขค่าตามอินพุต
     break;
   }
-  // pass edited value to the book
+  // ส่งค่าที่แก้ไขแล้วไปยัง data ตาม index นั้นๆ
   list->data[selectedIndex] = editedBook;
 }
 
+void bookShow_SpecificIndex(LIST_T* list, int indexSpec){
+  //printf("Debug Index: %d\n", ShowIndex[0]);
+  printf("Title: %s\n", getBookByIndex(list, indexSpec)->title);
+  printf("Author Name: %s\n", getBookByIndex(list, indexSpec)->author);
+  printf("Publish Year: %d\n", getBookByIndex(list, indexSpec)->year);
+  if (getBookByIndex(list, indexSpec)->name != NULL) {
+    // printf("Status: %s\n", );
+    printf("Borrowing History:\n");
+  } 
+  else {
+    printf("Status: Available\n");
+  }
+  printf("\n");
+}
+
 void bookSearch(LIST_T *list) {
-  // searching with title
+  // ค้นหาด้วย title
   char searchByTitle[60] = "";
-  printf("Enter title (leave blank to include all titles):");
+  printf("Enter title (leave blank to include all titles): ");
   fgets(searchByTitle, MAX_CHAR_LENGTH, stdin);
   fflush(stdin);
   searchByTitle[strcspn(searchByTitle, "\n")] = 0;
-  // printf("Text:%s\nlen:%d\n", searchByTitle, strlen(searchByTitle));
-  int length_searchByTitle = strlen(searchByTitle);
 
-  // searching with author
+  // ค้นหาด้วย author
   char searchByAuthor[60] = "";
-  printf("Enter author name (leave blank to include all author names):");
+  printf("Enter author name (leave blank to include all author names): ");
   fgets(searchByAuthor, MAX_CHAR_LENGTH, stdin);
   fflush(stdin);
   searchByAuthor[strcspn(searchByAuthor, "\n")] = 0;
-  // printf("Text:%s\nlen:%d\n", searchByAuthor, strlen(searchByAuthor));
-  int length_searchByAuthor = strlen(searchByAuthor);
-        
-  char book_title[60] = "";
-  char book_author[60] = "";
-  int length_title, length_author;
-  int cmp_title, cmp_author;
-  for (int index = 0; index < list->currentSize; index++) {
-    strcpy(book_title, getBookByIndex(list, index)->title);
-    strcpy(book_author, getBookByIndex(list, index)->author);
-    length_title = strlen(book_title);
-    length_author = strlen(book_author);
-    cmp_title = strcmp(searchByTitle, book_title);
-    cmp_author = strcmp(searchByAuthor, book_author);
-    // check compared value
-    // printf("Cmp_title:%s value:%d\n", book_title, cmp_title);
-    // printf("Cmp_author:%s value:%d\n", book_author, cmp_author);
 
-    if ((cmp_title == 0 && length_searchByAuthor == 0) ||
-        (length_searchByTitle == 0 && cmp_author) ||
-        (cmp_author == 0 && cmp_title == 0)) {
-      printf("Title: %s\n", getBookByIndex(list, index)->title);
-      printf("Author Name: %s\n", getBookByIndex(list, index)->author);
-      printf("Publish Year: %d\n", getBookByIndex(list, index)->year);
-      break;
-    } else {
-      if (index == list->currentSize - 1) {
-        printf("Not Found!");
-      } else {
-        continue;
+  printf("\n");
+  
+  char* result_title; // ตัวแปรสำหรับเก็บผลลัพธ์ที่ผ่านการใช้ฟังก์ชัน strstr
+  int indexSearched = -1; // กำหนดค่าเริ่มต้นเพื่อความสะดวกต่อการเช็คเงื่อนไข
+  
+  // กรณี 1 : ทั้ง title และ author เว้นว่าง (แสดงหนังสือทุกเล่ม)
+  if(strlen(searchByTitle) == 0 && strlen(searchByAuthor) == 0){
+    bookListShow(list);
+  }
+    
+  // กรณี 2 : ระบุ title แต่ author เว้นว่าง
+  else if(strlen(searchByTitle) != 0 && strlen(searchByAuthor) == 0){
+    // Loop เพื่อเช็คหาชื่อหนังสือที่ตรงกับคำค้นหา
+    for (int index = 0; index < list->currentSize ; index++) {
+      result_title = strstr(getBookByIndex(list, index)->title, searchByTitle);
+      // กรณี 2.1 : เจอคำซ้ำเหมือนชื่อหนังสือ
+      if(result_title != NULL){
+        indexSearched = index;
+        bookShow_SpecificIndex(list, indexSearched); // แสดงผลหนังสือที่ค้นหาเจอ
+      }
+      // กรณี 2.2 : ไม่เจอคำซ้ำเหมือนชื่อหนังสือ
+      else if (result_title == NULL && index == list->currentSize - 1 && indexSearched == -1){
+        printf("Not Found\n");
       }
     }
   }
+    
+  // กรณี 3 : title เว้นว่าง แต่ระบุ author 
+  else if(strlen(searchByTitle) == 0 && strlen(searchByAuthor) != 0){
+  }
+    
+  // กรณี 4 : ระบุทั้ง title และ author
+  else if(strlen(searchByTitle) != 0 && strlen(searchByAuthor) != 0){
+  }
+  
+  for (int index = 0; index < list->currentSize; index++) {
+
+  }
+  printf("\n");
 }

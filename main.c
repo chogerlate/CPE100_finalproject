@@ -17,7 +17,7 @@ int main(void) {
   LIST_T *BookList = listCreate(1);
   char *filepath = "data.txt"; //
   // bookCreateFromtxt(BookList, filepath); // แบบมี starter
-  bookCreateFromtxt(BookList, "output.txt"); // โหลด memory from saved file
+  bookCreateFromtxt(BookList, "output.txt"); // โหลดข้อมูลจากไฟล์ที่ save ไว้
 
   //------------------ ค่าตัวเลือก -------------------------
   
