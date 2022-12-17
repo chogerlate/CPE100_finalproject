@@ -3,29 +3,53 @@
 #include "arraylist.h"
 
 typedef struct {
-        char title[60];
-        char author[60];
-        int year;   
-        LIST_T** name;
-        LIST_T** option;
-} BOOK;
+  char title[60];
+  char author[60];
+  int year;
+  int status; 
+  LIST_T *name;
+  LIST_T *option;
+}BOOK;
 
-BOOK* bookCreate(); //manually create book  
-BOOK* booKCreateAuto(char title[60] ,char author[60],char year[60]); //Generate Book from data that receive from BookCreateFromtxt.
-LIST_T* bookCreateFromtxt(LIST_T* list ,char* filepath);//Generate BookList from .txt file 
-void bookListShow(LIST_T* list); // Show all the book  in booklist
+int getOptionValueByIndex(LIST_T* list,int book_index ,int index);
+char* getNameValueByIndex(LIST_T* list,int book_index , int index);
+LIST_T* getOptionListByIndex(LIST_T*, int);
+LIST_T* getNameListByIndex(LIST_T*,int);
 
-BOOK* getBookByIndex(LIST_T* list,int index); // get access to book 
+BOOK *bookCreate(); // manually create book
+BOOK *booKCreateAuto(char title[60], char author[60],
+                     char year[60]); // Generate Book from data that receive
+                                     // from BookCreateFromtxt.
+LIST_T *bookCreateFromtxt(LIST_T *list,
+                          char *filepath); // Generate BookList from .txt file
+void bookListShow(LIST_T *list,
+                  LIST_T *borrowList); // Show all the book  in booklist
 
-void bookListRemoveByTitle(LIST_T* list); // remove book from booklist
-void bookDestroy(BOOK* book); // clear memory of book
-void bookListDestroy(LIST_T* list);  // free memory of booklist (including the books inside of it)
-void saveBookList(LIST_T* list,char*filepath);// save data for the next time
+BOOK *getBookByIndex(LIST_T *list, int index); // get access to book
 
-void bookEdit(LIST_T *list); // edit detail of the book
-void bookSearch(LIST_T *list); // searching book
+void bookListRemoveByTitle(LIST_T *list); // remove book from booklist
+void bookDestroy(BOOK *book);             // clear memory of book
+void bookListDestroy(
+    LIST_T *list); // free memory of booklist (including the books inside of it)
+void saveBookList(LIST_T *list, char *filepath); // save data for the next time
+void bookEdit(LIST_T *list);
 
+typedef struct {
+  char title[60];
+  int status;
+  char borrowHistory[100][60];
+  int count;
+  LIST_T **name;
+  LIST_T **option;
+} BORROW;
 LIST_T *borrowListCreateFromtxt(LIST_T *list, char *filepath);
+BORROW *borrowCreateAuto(char title[60], int status, char list[100][60],
+                         int count);
+void saveBorrowList(LIST_T *list, char *filepath);
 
+void bookSearch(LIST_T *list, LIST_T *borrowList); // searching book
 
+void borrowBook(LIST_T* list);
+
+void returnBook(LIST_T* list);
 #endif
