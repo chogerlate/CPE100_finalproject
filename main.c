@@ -11,31 +11,34 @@
 
 int main(void)
 {
-  //----------------- Setup ---------------------------
+  //----------------- Setup ---------------------------        
   // นำเอาค่าที่เซฟไว้มา เก็บเข้า booklist
-  LIST_T *BookList = listCreate(1);
-  char *filepath = "data.txt"; //
-  // bookCreateFromtxt(BookList, filepath); // แบบมี starter
-  bookCreateFromtxt(BookList, "output.txt"); // โหลดข้อมูลจากไฟล์ที่ save ไว้
-  LIST_T *borrowList = listCreate(1);
-  char *borrow_file_path = "borrow.txt";
-  borrowListCreateFromtxt(BookList,borrow_file_path);
-  //------------------ ค่าตัวเลือก -------------------------
-
+  LIST_T *BookList = listCreate(1); // สร้าง list ของหนังสือใน ห้องสมุด
         
+  char *bookfilepath = "bookHistory.txt"; 
+  char *borrowfilepath = "borrowHistory.txt";
+  char *saveBookHistoryFilePath = "bookHistory.txt";
+  char *saveBorrowHistoryFilePath = "borrowHistory.txt";
+  
+  bookCreateFromtxt(BookList, bookfilepath); // โหลดข้อมูลจากไฟล์ที่ save ไว้
+  borrowListCreateFromtxt(BookList,borrowfilepath); 
+  
+ //------------------ ตัวเลือก -------------------------        
   while (1)
   {
-    char temp_option[MAX_OPTION_LENGTH];
+    printBookTable(BookList);    
+    printf("\n");     
+    char temp_option[MAX_OPTION_LENGTH]; //เก็บค่า option เป็น char ก
     int selected_choice = 0;
-    printf("Menu \n");
-    printf("1)Add book\n");
-    printf("2)Remove book\n");
-    printf("3)Edit book\n");
-    printf("4)Show all book\n");
-    printf("5)Search book\n");
-    printf("6)Borrow book\n");
-    printf("7)Return book\n");
-    printf("8)Exit\n");
+    printf("[ Menu ]\n");
+    printf("1) Add book\n");
+    printf("2) Remove book\n");
+    printf("3) Edit book\n");
+    printf("4) Show all book\n");
+    printf("5) Search book\n");
+    printf("6) Borrow book\n");
+    printf("7) Return book\n");
+    printf("8) Exit\n");
     fgets(temp_option, MAX_OPTION_LENGTH, stdin);
     selected_choice = atoi(temp_option);
 
@@ -49,7 +52,6 @@ int main(void)
     {
       printf("\n-----[ You selected Remove book option ]-----\n");
       bookListRemoveByTitle(BookList);
-      bookListShow(BookList,borrowList);
     }
     else if (selected_choice == 3)
     {
@@ -59,12 +61,12 @@ int main(void)
     else if (selected_choice == 4)
     {
       printf("\n-----[ You selected Show All Book option ]-----\n");
-      bookListShow(BookList,borrowList);
+      bookListShow(BookList);
     }
     else if (selected_choice == 5)
     {
       printf("\n-----[ You selected Search option ]-----\n");
-      bookSearch(BookList,borrowList);
+      bookSearch(BookList);
     }
     else if (selected_choice == 6)
     {
@@ -79,9 +81,9 @@ int main(void)
     else if (selected_choice == 8)
     {
       printf("\n-----[ You selected Exit option ]-----\n");
-      saveBorrowList(BookList, "borrow2.txt");
-      saveBookList(BookList, "output.txt");
-      printf("The data had been saved \n see you later goodbye :) \n");
+      saveBookList(BookList, saveBookHistoryFilePath);
+      saveBorrowList(BookList, saveBorrowHistoryFilePath);
+      printf("The data had been saved \nsee you later goodbye :) \n");
       break;
     }
     else

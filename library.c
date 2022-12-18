@@ -16,6 +16,33 @@
 5) Storing data of the books and borrow/return records in other file
         */
 
+//print function
+void printline(){
+        printf("--------------------\n");
+}
+void printBookTable(LIST_T *list){ 
+  printf("\n[There are %d books in this library]\n",list->currentSize);
+  printline();
+  printf("  NO.| Status     | Title     \n");
+  printline();
+  for (int index = 0; index < list->currentSize; index++) {
+    BOOK *book = getBookByIndex(list, index);
+    printf("%5d",index);
+    if (book->option) {
+      if(book->option->currentSize-1 < 0 ){
+              printf("  %10s","Available");
+      }
+      else if(getOptionValueByIndex(list,index,book->option->currentSize-1)==1){
+              printf("  %10s","Available");
+      }else {
+              printf("  %10s","Borrowed");
+      }
+    }
+     printf("   %s\n", book->title);
+  }
+ printline();
+}
+
 LIST_T *getOptionListByIndex(LIST_T *list, int indexSearched) {
   return getBookByIndex(list, indexSearched)->option;
 }
@@ -150,14 +177,15 @@ LIST_T *bookCreateFromtxt(LIST_T *list, char *filepath) {
     }
     count++;
   }
-
+  // printf("NO. | Title\n");
+  // printline();
   for (int i = 0; i < round; i++) {
     // append book to booklist
-    printf("%d: %s\n", i, titleList[i]);
+    // printf("%d:   %s\n", i, titleList[i]);
     BOOK *temp_book = bookCreateAuto(titleList[i], authorList[i], yearList[i]);
     listAppend(list, temp_book);
   }
-
+  //printline();
   fclose(textfile);
 
   return list;
@@ -168,20 +196,16 @@ BOOK *getBookByIndex(LIST_T *list, int index) {
   return (BOOK *)listGetAt(list, index);
 }
 
-BORROW *getBorrowByIndex(LIST_T *list, int index) {
-  // using this function to get access to a book element via the index
-  return (BORROW *)listGetAt(list, index);
-}
 
-void bookListShow(LIST_T *list, LIST_T *borrowList) {
+void bookListShow(LIST_T *list) {
   // show books in booklist
   // show books in booklist
   printf("[There are %d books in this library]\n\n", list->currentSize);
 
   for (int index = 0; index < list->currentSize; index++) {
     BOOK *book = getBookByIndex(list, index);
-    printf("Title: %s\n", book->title);
-    printf("Author Name: %s\n", book->author);
+    printf("Title:        %s\n", book->title);
+    printf("Author Name:  %s\n", book->author);
     printf("Publish Year: %d\n", book->year);
     if (book->option) {
       if(book->option->currentSize-1 < 0 ){
@@ -203,6 +227,8 @@ void bookListShow(LIST_T *list, LIST_T *borrowList) {
                listGetAt(getBookByIndex(list, index)->name, index_option));
       }
     }
+   
+    printline();
     printf("\n");
   }
 }
@@ -370,6 +396,10 @@ void bookEdit(LIST_T *list) {
     editedBook->year = atoi(temp_year); // แก้ไขค่าตามอินพุต
     break;
   }
+
+  // ส่งต่อค่าภายในlist name แล้วก็ option
+  editedBook->name = getNameListByIndex(list,selectedIndex);
+  editedBook->option = getOptionListByIndex(list,selectedIndex);
   // ส่งค่าที่แก้ไขแล้วไปยัง data ตาม index นั้นๆ
   list->data[selectedIndex] = editedBook;
 }
@@ -377,8 +407,8 @@ void bookEdit(LIST_T *list) {
 void bookShow_SpecificIndex(LIST_T *list, int indexSpec) {
        
     BOOK *book = getBookByIndex(list, indexSpec);
-    printf("Title: %s\n", book->title);
-    printf("Author Name: %s\n", book->author);
+    printf("Title:        %s\n", book->title);
+    printf("Author Name:  %s\n", book->author);
     printf("Publish Year: %d\n", book->year);
     if (book->option) {
       if(book->option->currentSize-1 < 0 ){
@@ -405,7 +435,7 @@ void bookShow_SpecificIndex(LIST_T *list, int indexSpec) {
         
 }
 
-void bookSearch(LIST_T *list, LIST_T *borrowList) {
+void bookSearch(LIST_T *list) {
   // ค้นหาด้วย title
   char searchByTitle[60] = "";
   printf("Enter title (leave blank to include all titles): ");
@@ -428,7 +458,7 @@ void bookSearch(LIST_T *list, LIST_T *borrowList) {
 
   // กรณี 1 : ทั้ง title และ author เว้นว่าง (แสดงหนังสือทุกเล่ม)
   if (strlen(searchByTitle) == 0 && strlen(searchByAuthor) == 0) {
-    bookListShow(list, borrowList);
+    bookListShow(list);
   }
 
   // กรณี 2 : ระบุ title แต่ author เว้นว่าง
@@ -488,108 +518,6 @@ void bookSearch(LIST_T *list, LIST_T *borrowList) {
   printf("\n");
 }
 
-/* fan version:
-BORROW *borrowCreateAuto(char title[60], int status, char list[100][60],
-                         int count) {
-  //  Create the BOOK structure automatically. This function must be used in
-  //   conjunction with the BookCreateFromText function. 
-  BORROW *b1 = (BORROW *)calloc(count, sizeof(BORROW));
-  char temp_title[60];
-  strcpy(temp_title, title);
-  if (strlen(temp_title) > 60 || strlen(temp_title) < 1) {
-    printf("Invalid title\n");
-  }
-  int temp_status = status;
-  strcpy(b1->title, temp_title);
-  b1->status = temp_status;
-  memcpy(&b1->borrowHistory, list, count * 60 * sizeof(char));
-  // b1->borrowHistory = list;
-  b1->count = count;
-  return b1;
-}
-
-LIST_T *borrowListCreateFromtxt(LIST_T *list, char *filepath) {
-  // This function used to create BookList from .txt file
-
-  FILE *textfile;
-  char line[MAX_LINE_LENGTH];
-  char titleList[MAX_LINE_LENGTH][60];
-  textfile = fopen(filepath, "r");
-  if (textfile == NULL)
-    printf("ERROR THE FILE CAN'T BE OPEN\n");
-
-  int count = 0;
-  int round = 1;
-  char tempHistory[MAX_LINE_LENGTH];
-  int tempStatusList[MAX_LINE_LENGTH];
-  int tempBookStatus[MAX_LINE_LENGTH];
-  int tempBookHistoryNumber[MAX_LINE_LENGTH];
-  char bookHistoryList[MAX_LINE_LENGTH][100][60];
-  while (fgets(line, MAX_LINE_LENGTH, textfile)) {
-
-    line[strlen(line) - 1] = '\0'; //ลบตัว \n
-    if (strcmp(line, "\0") == 0) {
-      char tempStatus = tempHistory[0];
-      if (tempStatus == '0') {
-        tempBookStatus[round - 1] = 0;
-      }
-      if (tempStatus == '1') {
-        tempBookStatus[round - 1] = 1;
-      }
-      strcpy(tempHistory, "");
-      tempBookHistoryNumber[round - 1] = count - 1;
-      round++;
-      count = 0;
-    } else {
-      if (count == 0) {
-        strcpy(titleList[round - 1], line);
-      }
-      if (count >= 1) {
-        strcpy(tempHistory, line);
-        strcpy(bookHistoryList[round - 1][count - 1], line);
-      }
-      count++;
-    }
-  }
-  for (int i = 0; i < round - 1; i++) {
-    BORROW *temp_borrow =
-        borrowCreateAuto(titleList[i], tempBookStatus[i], bookHistoryList[i],
-                         tempBookHistoryNumber[i]);
-    listAppend(list, temp_borrow);
-  }
-  fclose(textfile);
-  return list;
-}
-
-
-void saveBorrowList(LIST_T *list, char *filepath) {
-  FILE *textfile;
-  textfile = fopen("borrow_test.txt", "w");
-  if (textfile == NULL)
-    printf("ERROR THE FILE CAN'T BE OPEN\n");
-
-  for (int book_index = 0; book_index < list->currentSize; book_index++) {
-    // write booklist to output file
-    fprintf(textfile, "%s\n", getBorrowByIndex(list, book_index)->title);
-    fprintf(textfile, "%s\n",
-            &getBorrowByIndex(list, book_index)->borrowHistory[0][0]);
-    // fprintf(textfile, "%s\n", getBorrowByIndex(list,
-    // book_index)->borrowHistory[0][0]); fprintf(textfile, "%s\n",
-    // getBookByIndex(list, book_index)->author); fprintf(textfile, "%d\n",
-    // getBookByIndex(list, book_index)->year);
-    if (book_index == list->currentSize - 1) {
-      break;
-    }
-    fprintf(textfile, "\n");
-  }
-
-  fclose(textfile);
-}
-
-*/
-
-// Ger version instead of using borrow struct, let's store our information in
-// one place .
 LIST_T *borrowListCreateFromtxt(LIST_T *list, char *filepath) {
   // This function used to create BookList from .txt file
 
@@ -760,7 +688,7 @@ void borrowBook(LIST_T *list){
       BOOK *book = getBookByIndex(list, index);
       result_title = strcmp(book->title, searchByTitle); // เช็คว่ามีชื่อหนังสือที่เหมือนกับที่กรอกไหม
       status = getOptionValueByIndex(list,index,book->option->currentSize-1);
-      printf("compare to %s | retult =  %d |user_name: %s\n",book->title,result_title,user_name);
+      // printf("compare to %s | retult =  %d |user_name: %s\n",book->title,result_title,user_name);
           
       if (result_title == 0 && (status == 1 || status == -1) ) {
         indexSearched = index;
@@ -768,6 +696,7 @@ void borrowBook(LIST_T *list){
         *toadd_option = 0;                
           listAppend(getNameListByIndex(list, indexSearched),user_name);
           listAppend(getOptionListByIndex(list, indexSearched), toadd_option);
+          printf("{ Success }\n");
           break;
       }
       else if(result_title == 0 && status == 0){
@@ -801,7 +730,7 @@ void returnBook(LIST_T *list){
       result_title = strcmp(book->title, searchByTitle); // เช็คว่ามีชื่อหนังสือที่เหมือนกับที่กรอกไหม
       status = getOptionValueByIndex(list,index,book->option->currentSize-1);
       returner = getNameValueByIndex(list,index,book->option->currentSize-1);
-      printf("compare to %s result =  %d \n",book->title,result_title);
+      // printf("compare to %s result =  %d \n",book->title,result_title);
           
       // กรณี 2.1 : เจอคำค้นหาซ้ำเหมือนชื่อหนังสือ และสามารถยืมได้
       if (result_title == 0 && status == 0 ) {
@@ -827,3 +756,110 @@ void returnBook(LIST_T *list){
       }
     }
 }
+
+// ฟังก์ชั่นที่ไม่ได้ใช้
+/* 
+BORROW *getBorrowByIndex(LIST_T *list, int index) {
+  // using this function to get access to a book element via the index
+  return (BORROW *)listGetAt(list, index);
+}
+/* fan version:
+BORROW *borrowCreateAuto(char title[60], int status, char list[100][60],
+                         int count) {
+  //  Create the BOOK structure automatically. This function must be used in
+  //   conjunction with the BookCreateFromText function. 
+  BORROW *b1 = (BORROW *)calloc(count, sizeof(BORROW));
+  char temp_title[60];
+  strcpy(temp_title, title);
+  if (strlen(temp_title) > 60 || strlen(temp_title) < 1) {
+    printf("Invalid title\n");
+  }
+  int temp_status = status;
+  strcpy(b1->title, temp_title);
+  b1->status = temp_status;
+  memcpy(&b1->borrowHistory, list, count * 60 * sizeof(char));
+  // b1->borrowHistory = list;
+  b1->count = count;
+  return b1;
+}
+
+LIST_T *borrowListCreateFromtxt(LIST_T *list, char *filepath) {
+  // This function used to create BookList from .txt file
+
+  FILE *textfile;
+  char line[MAX_LINE_LENGTH];
+  char titleList[MAX_LINE_LENGTH][60];
+  textfile = fopen(filepath, "r");
+  if (textfile == NULL)
+    printf("ERROR THE FILE CAN'T BE OPEN\n");
+
+  int count = 0;
+  int round = 1;
+  char tempHistory[MAX_LINE_LENGTH];
+  int tempStatusList[MAX_LINE_LENGTH];
+  int tempBookStatus[MAX_LINE_LENGTH];
+  int tempBookHistoryNumber[MAX_LINE_LENGTH];
+  char bookHistoryList[MAX_LINE_LENGTH][100][60];
+  while (fgets(line, MAX_LINE_LENGTH, textfile)) {
+
+    line[strlen(line) - 1] = '\0'; //ลบตัว \n
+    if (strcmp(line, "\0") == 0) {
+      char tempStatus = tempHistory[0];
+      if (tempStatus == '0') {
+        tempBookStatus[round - 1] = 0;
+      }
+      if (tempStatus == '1') {
+        tempBookStatus[round - 1] = 1;
+      }
+      strcpy(tempHistory, "");
+      tempBookHistoryNumber[round - 1] = count - 1;
+      round++;
+      count = 0;
+    } else {
+      if (count == 0) {
+        strcpy(titleList[round - 1], line);
+      }
+      if (count >= 1) {
+        strcpy(tempHistory, line);
+        strcpy(bookHistoryList[round - 1][count - 1], line);
+      }
+      count++;
+    }
+  }
+  for (int i = 0; i < round - 1; i++) {
+    BORROW *temp_borrow =
+        borrowCreateAuto(titleList[i], tempBookStatus[i], bookHistoryList[i],
+                         tempBookHistoryNumber[i]);
+    listAppend(list, temp_borrow);
+  }
+  fclose(textfile);
+  return list;
+}
+
+
+void saveBorrowList(LIST_T *list, char *filepath) {
+  FILE *textfile;
+  textfile = fopen("borrow_test.txt", "w");
+  if (textfile == NULL)
+    printf("ERROR THE FILE CAN'T BE OPEN\n");
+
+  for (int book_index = 0; book_index < list->currentSize; book_index++) {
+    // write booklist to output file
+    fprintf(textfile, "%s\n", getBorrowByIndex(list, book_index)->title);
+    fprintf(textfile, "%s\n",
+            &getBorrowByIndex(list, book_index)->borrowHistory[0][0]);
+    // fprintf(textfile, "%s\n", getBorrowByIndex(list,
+    // book_index)->borrowHistory[0][0]); fprintf(textfile, "%s\n",
+    // getBookByIndex(list, book_index)->author); fprintf(textfile, "%d\n",
+    // getBookByIndex(list, book_index)->year);
+    if (book_index == list->currentSize - 1) {
+      break;
+    }
+    fprintf(textfile, "\n");
+  }
+
+  fclose(textfile);
+}
+
+*/
+
