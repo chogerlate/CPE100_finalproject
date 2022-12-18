@@ -271,7 +271,25 @@
       ```
       ปริ้นข้อมูลรายละเอียดของหนังสือทุกเล่มในห้อมสมุด
   
-    
+* ### arraylist.c and arraylist.h
+  ---
+  ไฟล์ที่ใช้สร้างชนิดข้อมูลแบบกำหนดเอง list โดยมีการเก็บข้อมูลของในรูปแบบของ struct และมี Function การทำงานดังนี้
+  ```c
+  typedef struct{
+            void **data;  // ข้อมูลที่เก็บ
+            int currentSize; // ขนาดของ list
+            int maxSize; // ขนาดความจุสูงสุดของ list ณ ปัจจุบัน
+        } LIST_T;
+        
+        LIST_T *listCreate(int initialCapacity); // Creating and initialization list
+        void listAppend(LIST_T *list, void *value); // เพิ่มข้อมูลต่อท้ายของ list 
+        void listInsertAt(LIST_T *list, int index, void *value); // เพิ่มข้อมูลแทรกใน list ตำแหน่ง index
+        void *listRemoveAt(LIST_T *list, int index); // ลบข้อมูลภายใน list ตำแหน่ง index
+        void *listGetAt(LIST_T *list, int index); // เข้าถึงข้อมูลภายใน list ตำแหน่ง index
+        int listSize(LIST_T *list); // คืนค่าขนาดของ list ปัจจุบัน
+        void listDestroy(LIST_T *list); // ลบ list 
+
+  ``` 
     
 
     
@@ -310,6 +328,6 @@
   * ### ฟังชันก์การจัดการ
     * สามารถลบหนังสือโดยการอ้างอิงจากชื่อหนังสือเท่านั้น
     * ไม่สามารถแก้ไขรายการยืม-คืนได้
-  * รองรับข้อมูลภายในไฟล์ .txt ได้ 1000 บรรทัด
+    * รองรับข้อมูลภายในไฟล์ .txt ได้ 1000 บรรทัด
 
 ---
