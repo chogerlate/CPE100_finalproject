@@ -14,7 +14,6 @@ int main(void)
   //----------------- Setup ---------------------------        
   // นำเอาค่าที่เซฟไว้มา เก็บเข้า booklist
   LIST_T *BookList = listCreate(1); // สร้าง list ของหนังสือใน ห้องสมุด
-  LIST_T *borrowList = listCreate(1); //สร้าง list 
         
   char *bookfilepath = "bookHistory.txt"; 
   char *borrowfilepath = "borrowHistory.txt";

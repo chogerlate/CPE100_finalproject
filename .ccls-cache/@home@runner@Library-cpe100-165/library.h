@@ -16,6 +16,7 @@ void printline(); // ปริ้นตัวคั้นบรรทัด
 void printBookTable(LIST_T* list); // ปริ้นตารางหนังสือภายในห้องสมุด
 void bookListShow(LIST_T *list); // ปริ้นข้อมูลรายละเอียดของหนังสือทุกเล่มในห้อมสมุด
 
+
 // function ช่วยในการดึงค่าจาก booklist
 int getOptionValueByIndex(LIST_T* list,int book_index ,int index); //ดึงค่าภายในอาเรย์ตำแหน่งที่index จาก Option ที่อยู๋ในหนังสือที่ book_index 
 char* getNameValueByIndex(LIST_T* list,int book_index , int index);//ดึงค่าภายในอาเรย์ตำแหน่งที่index จาก Name ที่อยู๋ในหนังสือที่ book_index 
@@ -23,11 +24,13 @@ LIST_T* getOptionListByIndex(LIST_T* list, int index); // ดึง List of Opti
 LIST_T* getNameListByIndex(LIST_T* list,int index); // ดึง List of Name ของหนังสือลำดับที่ index จาก list
 BOOK *getBookByIndex(LIST_T *list, int index); // ดึง BOOK Struct จาก List ตำแหน่งที่ index
 
+
 // function ใช่ในการอ่านค่าจากไฟล์เซฟ
 BOOK *booKCreateAuto(char title[60], char author[60],
                      char year[60]); // สร้าง BOOK struct จากค่าที่ส่งมาจาก function bookCreateFromtxt
 LIST_T *bookCreateFromtxt(LIST_T *list,
                           char *filepath); // อ่านค่าและสร้าง list ของหนังสือจากไฟล์ 
+LIST_T *borrowListCreateFromtxt(LIST_T *list, char *filepath);
 
 // function ในการเซฟข้อมูลไฟล์
 void saveBookList(LIST_T *list, char *filepath); // เขียนข้อมูลหนังสือ เซฟไว้ใน filepath ที่กำหนด
